@@ -1,0 +1,14 @@
+black
+flake8
+isort
+numpy
+Pillow
+scikit-learn
+scipy
+tabulate
+torch
+torchvision
+tqdm
+yacs
+future
+tensorboard
