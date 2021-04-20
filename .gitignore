@@ -1,4 +1,5 @@
 # customization
+*.out
 data
 exp*
 vis
