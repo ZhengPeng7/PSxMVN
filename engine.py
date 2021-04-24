@@ -6,7 +6,7 @@ import torch
 from torch.nn.utils import clip_grad_norm_
 from tqdm import tqdm
 
-from eval_func import eval_detection, eval_search_cuhk, eval_search_prw
+from eval_func import eval_detection, eval_search_cuhk, eval_search_prw, eval_search_mvn
 from utils.utils import MetricLogger, SmoothedValue, mkdir, reduce_dict, warmup_lr_scheduler
 
 
@@ -148,9 +148,13 @@ def evaluate_performance(
         torch.save(save_dict, "data/eval_cache/eval_cache.pth")
 
     eval_detection(gallery_loader.dataset, gallery_dets, det_thresh=0.01)
-    eval_search_func = (
-        eval_search_cuhk if gallery_loader.dataset.name == "CUHK-SYSU" else eval_search_prw
-    )
+    if gallery_loader.dataset.name == "CUHK-SYSU":
+        eval_search_func = eval_search_cuhk
+    elif gallery_loader.dataset.name == "PRW":
+        eval_search_func = eval_search_prw
+    elif gallery_loader.dataset.name == "MVN":
+        eval_search_func = eval_search_mvn
+
     eval_search_func(
         gallery_loader.dataset,
         query_loader.dataset,

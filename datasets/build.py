@@ -5,6 +5,7 @@ from utils.utils import create_small_table
 
 from .cuhk_sysu import CUHKSYSU
 from .prw import PRW
+from .mvn import MVN
 
 
 def print_statistics(dataset):
@@ -45,8 +46,8 @@ def build_dataset(dataset_name, root, transforms, split, verbose=True):
         dataset = CUHKSYSU(root, transforms, split)
     elif dataset_name == "PRW":
         dataset = PRW(root, transforms, split)
-    elif dataset_name == 'MovieNet':
-        raise NotImplementedError(f"Unknow dataset: {dataset_name}")
+    elif dataset_name == 'MVN':
+        dataset = MVN(root, transforms, split)
     else:
         raise NotImplementedError(f"Unknow dataset: {dataset_name}")
     if verbose:

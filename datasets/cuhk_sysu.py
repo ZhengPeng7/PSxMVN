@@ -39,13 +39,13 @@ class CUHKSYSU(BaseDataset):
         # gallery images
         gallery_imgs = loadmat(osp.join(self.root, "annotation", "pool.mat"))
         gallery_imgs = gallery_imgs["pool"].squeeze()
-        gallery_imgs = [str(a[0]) for a in gallery_imgs]
+        gallery_imgs = [str(a.squeeze()) for a in gallery_imgs]
         if self.split == "gallery":
             return gallery_imgs
         # all images
         all_imgs = loadmat(osp.join(self.root, "annotation", "Images.mat"))
         all_imgs = all_imgs["Img"].squeeze()
-        all_imgs = [str(a[0][0]) for a in all_imgs]
+        all_imgs = [str(a[0].squeeze()) for a in all_imgs]
         # training images = all images - gallery images
         training_imgs = sorted(list(set(all_imgs) - set(gallery_imgs)))
         return training_imgs
