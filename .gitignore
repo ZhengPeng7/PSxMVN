@@ -4,7 +4,7 @@ data
 exp*
 vis
 .vscode
-*_*.sh
+# *_*.sh
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
