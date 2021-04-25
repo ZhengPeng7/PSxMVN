@@ -1,7 +1,9 @@
+import os
 import os.path as osp
 import re
 
 import numpy as np
+from numpy import array, int32
 from scipy.io import loadmat
 
 from .base import BaseDataset
@@ -11,6 +13,7 @@ class MVN(BaseDataset):
     def __init__(self, root, transforms, split):
         self.name = "MVN"
         self.img_prefix = osp.join(root, "frames")
+        self.anno_preloaded = 'data/anno_loaded/{}.txt'.format(split)
         super(MVN, self).__init__(root, transforms, split)
 
     # def _get_cam_id(self, img_name):
@@ -18,6 +21,11 @@ class MVN(BaseDataset):
     #     return int(match)
 
     def _load_queries(self):
+        if os.path.exists(self.anno_preloaded):
+            with open(self.anno_preloaded, 'r') as fin:
+                queries = eval(fin.read())
+            return queries
+
         query_info = osp.join(self.root, "query_info.txt")
         with open(query_info, "rb") as f:
             raw = f.readlines()
@@ -34,11 +42,11 @@ class MVN(BaseDataset):
             )
             roi = np.array([x, y, x + w, y + h]).astype(np.int32)
             roi = np.clip(roi, 0, None)  # several coordinates are negative
-            img_name = linelist[5][:-2] + ".jpg"
+            img_name = linelist[5].strip() + ".jpg"
             queries.append(
                 {
                     "img_name": img_name,
-                    "img_path": osp.join(self.img_prefix, img_name),
+                    "img_path": osp.join(self.img_prefix.replace('frames', 'query_portraits'), img_name),
                     "boxes": roi[np.newaxis, :],
                     "pids": np.array([pid]),
                     # "cam_id": self._get_cam_id(img_name),
@@ -61,9 +69,17 @@ class MVN(BaseDataset):
         if self.split == "query":
             return self._load_queries()
 
+        if os.path.exists(self.anno_preloaded):
+            with open(self.anno_preloaded, 'r') as fin:
+                annotations = eval(fin.read())
+            return annotations
+
         annotations = []
         imgs = self._load_split_img_names()
-        for img_name in imgs:
+        print('Loading annotations >>>')
+        for idx_img, img_name in enumerate(imgs):
+#             if idx_img % 5000 == 0:
+            print('{}/{},\t'.format(idx_img, len(imgs)), end='')
             anno_path = osp.join(self.root, "annotations", img_name.replace('.jpg', ''))
             anno = loadmat(anno_path)
             box_key = "box_new"
@@ -90,4 +106,5 @@ class MVN(BaseDataset):
                     # "cam_id": self._get_cam_id(img_name),
                 }
             )
+        print('\n<<< End')
         return annotations

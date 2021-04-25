@@ -19,6 +19,7 @@ def print_statistics(dataset):
         num_boxes += anno["boxes"].shape[0]
         for pid in anno["pids"]:
             pid_set.add(pid)
+#     print('pid_set:', pid_set)
     statistics = {
         "dataset": dataset.name,
         "split": dataset.split,

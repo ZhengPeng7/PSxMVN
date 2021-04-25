@@ -1,5 +1,5 @@
 # cuhk / prw / mvn
-dataset="cuhk"
+dataset="mvn"
 
 if [ ${dataset} == "cuhk" ]; then epoch="19"; elif [ ${dataset} == "prw" ]; then epoch="17"; else epoch="4"; fi;
 
