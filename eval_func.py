@@ -530,7 +530,6 @@ def eval_search_mvn(
         query_imname = query_dataset.annotations[i]["img_name"]
         query_roi = query_dataset.annotations[i]["boxes"]
         query_pid = query_dataset.annotations[i]["pids"]
-        query_cam = query_dataset.annotations[i]["cam_id"]
 
         # Find all occurence of this query
         gallery_imgs = []
@@ -544,7 +543,7 @@ def eval_search_mvn(
         # Construct gallery set for this query
         gallery_imgs = []
         for x in annos:
-            if x["img_name"] != query_imname and x["cam_id"] != query_cam:
+            if x["img_name"] != query_imname:
                 gallery_imgs.append(x)
 
         name2sim = {}
