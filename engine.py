@@ -7,8 +7,14 @@ from torch.nn.utils import clip_grad_norm_
 from tqdm import tqdm
 
 from eval_func import eval_detection, eval_search_cuhk, eval_search_prw, eval_search_mvn
-from utils.utils import MetricLogger, SmoothedValue, mkdir, reduce_dict, warmup_lr_scheduler
-
+from utils.utils import (
+    MetricLogger,
+    SmoothedValue,
+    is_main_process,
+    mkdir,
+    reduce_dict,
+    warmup_lr_scheduler,
+)
 
 def to_device(images, targets, device):
     images = [image.to(device) for image in images]
@@ -60,7 +66,7 @@ def train_one_epoch(cfg, model, optimizer, data_loader, device, epoch, tfboard=N
 
         metric_logger.update(loss=loss_value, **loss_dict_reduced)
         metric_logger.update(lr=optimizer.param_groups[0]["lr"])
-        if tfboard:
+        if tfboard and is_main_process():
             iter = epoch * len(data_loader) + i
             for k, v in loss_dict_reduced.items():
                 tfboard.add_scalars("train", {k: v}, iter)
