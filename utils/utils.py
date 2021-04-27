@@ -309,17 +309,22 @@ def save_on_master(*args, **kwargs):
 
 
 def init_distributed_mode(args):
-    if "RANK" in os.environ and "WORLD_SIZE" in os.environ:
-        args.rank = int(os.environ["RANK"])
-        args.world_size = int(os.environ["WORLD_SIZE"])
-        args.gpu = int(os.environ["LOCAL_RANK"])
-    elif "SLURM_PROCID" in os.environ:
-        args.rank = int(os.environ["SLURM_PROCID"])
-        args.gpu = args.rank % torch.cuda.device_count()
-    else:
-        print("Not using distributed mode")
+    if args.eval:
         args.distributed = False
+        print("Not using distributed mode -- eval procedure")
         return
+    else:
+        if "RANK" in os.environ and "WORLD_SIZE" in os.environ:
+            args.rank = int(os.environ["RANK"])
+            args.world_size = int(os.environ["WORLD_SIZE"])
+            args.gpu = int(os.environ["LOCAL_RANK"])
+        elif "SLURM_PROCID" in os.environ:
+            args.rank = int(os.environ["SLURM_PROCID"])
+            args.gpu = args.rank % torch.cuda.device_count()
+        else:
+            print("Not using distributed mode -- lack system environ variable")
+            args.distributed = False
+            return
 
     args.distributed = True
 
@@ -410,8 +415,12 @@ def warmup_lr_scheduler(optimizer, warmup_iters, warmup_factor):
 
 
 def resume_from_ckpt(ckpt_path, model, optimizer=None, lr_scheduler=None):
-    ckpt = torch.load(ckpt_path)
-    model.load_state_dict(ckpt["model"], strict=False)
+    ckpt = torch.load(ckpt_path, map_location="cpu")
+    missing_keys, unexpected_keys = model.load_state_dict(ckpt["model"], strict=False)
+    if missing_keys:
+        print(f"missing keys: {missing_keys}")
+    if unexpected_keys:
+        print(f"unexpected keys: {unexpected_keys}")
     if optimizer is not None:
         optimizer.load_state_dict(ckpt["optimizer"])
     if lr_scheduler is not None:
@@ -422,6 +431,8 @@ def resume_from_ckpt(ckpt_path, model, optimizer=None, lr_scheduler=None):
 
 
 def set_random_seed(seed):
+    if seed < 0:
+        return
     torch.manual_seed(seed)
     torch.cuda.manual_seed(seed)
     torch.cuda.manual_seed_all(seed)
