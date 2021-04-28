@@ -4,7 +4,7 @@ dataset="prw"
 # Keep consistant with N in sub_prw.sh
 NGPU=8
 
-if [ ${dataset} == "cuhk" ]; then let epoch=20*${NGPU}-1; elif [ ${dataset} == prw ]; then epoch=let epoch=18*${NGPU}-1; else let epoch=2*${NGPU}-1; fi;
+if [ ${dataset} == "cuhk" ]; then let epoch=20*${NGPU}-1; elif [ ${dataset} == prw ]; then let epoch=18*${NGPU}-1; else let epoch=2*${NGPU}-1; fi;
 
 # Train
 python -m torch.distributed.launch --nproc_per_node=${NGPU} --use_env train.py --cfg configs/${dataset}.yaml --world-size ${NGPU}

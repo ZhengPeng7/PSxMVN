@@ -171,6 +171,16 @@ def main(args):
             train_sampler.set_epoch(epoch)
         train_one_epoch(cfg, model, optimizer, train_loader, device, epoch, tfboard)
         lr_scheduler.step()
+        if ((epoch + 1) > cfg.EVAL_PERIOD['epoch_st'] and (epoch + 1) % cfg.EVAL_PERIOD['interval'] == 0) or epoch == cfg.SOLVER.MAX_EPOCHS - 1:
+            evaluate_performance(
+                model,
+                gallery_loader,
+                query_loader,
+                device,
+                use_gt=cfg.EVAL_USE_GT,
+                use_cache=cfg.EVAL_USE_CACHE,
+                use_cbgm=cfg.EVAL_USE_CBGM,
+            )
         if (epoch + 1) % cfg.CKPT_PERIOD == 0 or epoch == cfg.SOLVER.MAX_EPOCHS - 1:
             save_on_master(
                 {
