@@ -171,7 +171,7 @@ def main(args):
             train_sampler.set_epoch(epoch)
         train_one_epoch(cfg, model, optimizer, train_loader, device, epoch, tfboard)
         lr_scheduler.step()
-        if ((epoch + 1) > cfg.EVAL_PERIOD['epoch_st'] and (epoch + 1) % cfg.EVAL_PERIOD['interval'] == 0) or epoch == cfg.SOLVER.MAX_EPOCHS - 1:
+        if ((epoch + 1) > cfg.EVAL_PERIOD[0] and (epoch + 1) % cfg.EVAL_PERIOD[1] == 0) or epoch == cfg.SOLVER.MAX_EPOCHS - 1:
             evaluate_performance(
                 model,
                 gallery_loader,
