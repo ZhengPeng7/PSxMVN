@@ -122,7 +122,7 @@ _C.MODEL.LOSS.OIM_SCALAR = 30.0
 #                        Evaluation                        #
 # -------------------------------------------------------- #
 # The period to evaluate the model during training
-_C.EVAL_PERIOD = {"epoch_st": 0, "interval": 1}
+_C.EVAL_PERIOD = [0, 1]     # epoch_start, validation_interval
 # Evaluation with GT boxes to verify the upper bound of person search performance
 _C.EVAL_USE_GT = False
 # Fast evaluation with cached features
