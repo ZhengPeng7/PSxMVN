@@ -47,19 +47,19 @@ _C.SOLVER.WEIGHT_DECAY = 0.0005
 _C.SOLVER.SGD_MOMENTUM = 0.9
 
 # Loss weight of RPN regression
-_C.SOLVER.LW_RPN_REG = 1
+_C.SOLVER.LW_RPN_REG = 1.
 # Loss weight of RPN classification
-_C.SOLVER.LW_RPN_CLS = 1
+_C.SOLVER.LW_RPN_CLS = 1.
 # Loss weight of proposal regression
-_C.SOLVER.LW_PROPOSAL_REG = 10
+_C.SOLVER.LW_PROPOSAL_REG = 10.
 # Loss weight of proposal classification
-_C.SOLVER.LW_PROPOSAL_CLS = 1
+_C.SOLVER.LW_PROPOSAL_CLS = 1.
 # Loss weight of box regression
-_C.SOLVER.LW_BOX_REG = 1
+_C.SOLVER.LW_BOX_REG = 1.
 # Loss weight of box classification
-_C.SOLVER.LW_BOX_CLS = 1
+_C.SOLVER.LW_BOX_CLS = 1.
 # Loss weight of box OIM (i.e. Online Instance Matching)
-_C.SOLVER.LW_BOX_REID = 1
+_C.SOLVER.LW_BOX_REID = 1.
 
 # Set to negative value to disable gradient clipping
 _C.SOLVER.CLIP_GRADIENTS = 10.0
