@@ -4,6 +4,7 @@ import os.path as osp
 import time
 
 import torch
+import torch.nn as nn
 import torch.utils.data
 
 from datasets import build_test_loader, build_train_loader
@@ -26,6 +27,10 @@ def main(args):
 
     print("Creating model")
     model = SeqNet(cfg)
+    gpu_count = torch.cuda.device_count()
+    if gpu_count > 1:
+        print("DP on {} GPUs!".format(gpu_count))
+        model = nn.DataParallel(model)
     model.to(device)
 
     print("Loading data")
