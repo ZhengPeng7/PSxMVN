@@ -3,6 +3,7 @@ import torch.nn.functional as F
 from torch import autograd, nn
 
 from utils.utils import all_gather
+import random
 
 
 class OIM(autograd.Function):
@@ -75,4 +76,12 @@ class OIMLoss(nn.Module):
             self.header_cq + (labels >= self.num_pids).long().sum().item()
         ) % self.num_unlabeled
         loss_oim = F.cross_entropy(projected, labels, ignore_index=5554)
+
+        if random.random() > 0.98:
+            pred = torch.argmax(projected, dim=1)
+            print("@@projected:", projected.shape, pred)
+            print("@@labels:", len(labels), labels[0].shape, labels)
+            print("acc: {:.2f}============".format((pred == labels).sum() / pred.squeeze().shape[0]))
+            print("loss: {:.2f}============".format(loss_oim.item()))
+            print('\n\n\n')
         return loss_oim

@@ -22,8 +22,13 @@ class MVN(BaseDataset):
 
     def _load_queries(self):
         if os.path.exists(self.anno_preloaded):
+            print('Loading preloaded one...')
             with open(self.anno_preloaded, 'r') as fin:
                 queries = eval(fin.read())
+            pids = []
+            for i in queries:
+                pids.append(i['pids'][0])
+            np.savetxt('data/anno_loaded/pids_{}.txt'.format(self.split), pids)
             return queries
 
         query_info = osp.join(self.root, "query_info.txt")
@@ -52,6 +57,13 @@ class MVN(BaseDataset):
                     # "cam_id": self._get_cam_id(img_name),
                 }
             )
+        print('-----------\n-----------\n{} pid:'.format(self.split))
+        with open('data/anno_loaded/{}.txt'.format(self.split), 'w') as fout:
+            fout.write(str(queries))
+        pids = []
+        for i in queries:
+            pids.append(i['pids'][0])
+        np.savetxt('data/anno_loaded/pids_{}.txt'.format(self.split), pids)
         return queries
 
     def _load_split_img_names(self):
@@ -70,16 +82,21 @@ class MVN(BaseDataset):
             return self._load_queries()
 
         if os.path.exists(self.anno_preloaded):
+            print('Loading preloaded one...')
             with open(self.anno_preloaded, 'r') as fin:
                 annotations = eval(fin.read())
+            pids = []
+            for i in annotations:
+                pids.append(i['pids'][0])
+            np.savetxt('data/anno_loaded/pids_{}.txt'.format(self.split), pids)
             return annotations
 
         annotations = []
         imgs = self._load_split_img_names()
         print('Loading annotations >>>')
         for idx_img, img_name in enumerate(imgs):
-#             if idx_img % 5000 == 0:
-            print('{}/{},\t'.format(idx_img, len(imgs)), end='')
+            if idx_img % 1000 == 0:
+                print('{}/{},\t'.format(idx_img, len(imgs)), end='')
             anno_path = osp.join(self.root, "annotations", img_name.replace('.jpg', ''))
             anno = loadmat(anno_path)
             box_key = "box_new"
@@ -106,5 +123,12 @@ class MVN(BaseDataset):
                     # "cam_id": self._get_cam_id(img_name),
                 }
             )
+        with open('data/anno_loaded/{}.txt'.format(self.split), 'w') as fout:
+            fout.write(str(annotations))
         print('\n<<< End')
+        print('-----------\n-----------\n{} pid:'.format(self.split))
+        pids = []
+        for i in annotations:
+            pids.append(i['pids'][0])
+        np.savetxt('data/anno_loaded/pids_{}.txt'.format(self.split), pids)
         return annotations
