@@ -25,10 +25,10 @@ class MVN(BaseDataset):
             print('Loading preloaded one...')
             with open(self.anno_preloaded, 'r') as fin:
                 queries = eval(fin.read())
-            pids = []
-            for i in queries:
-                pids.append(i['pids'][0])
-            np.savetxt('data/anno_loaded/pids_{}.txt'.format(self.split), pids)
+            # pids = []
+            # for i in queries:
+            #     pids.append(i['pids'][0])
+            # np.savetxt('data/anno_loaded/pids_{}.txt'.format(self.split), pids)
             return queries
 
         query_info = osp.join(self.root, "query_info.txt")
@@ -60,10 +60,10 @@ class MVN(BaseDataset):
         print('-----------\n-----------\n{} pid:'.format(self.split))
         with open('data/anno_loaded/{}.txt'.format(self.split), 'w') as fout:
             fout.write(str(queries))
-        pids = []
-        for i in queries:
-            pids.append(i['pids'][0])
-        np.savetxt('data/anno_loaded/pids_{}.txt'.format(self.split), pids)
+        # pids = []
+        # for i in queries:
+        #     pids.append(i['pids'][0])
+        # np.savetxt('data/anno_loaded/pids_{}.txt'.format(self.split), pids)
         return queries
 
     def _load_split_img_names(self):
@@ -105,7 +105,7 @@ class MVN(BaseDataset):
             if box_key not in anno.keys():
                 box_key = "anno_previous"
 
-            rois = np.round(anno[box_key][:, 1:] / 3)
+            rois = anno[box_key][:, 1:]
             ids = anno[box_key][:, 0]
             rois = np.clip(rois, 0, None)  # several coordinates are negative
 
@@ -125,10 +125,10 @@ class MVN(BaseDataset):
             )
         with open('data/anno_loaded/{}.txt'.format(self.split), 'w') as fout:
             fout.write(str(annotations))
+        # print('Saving {} pid.\n-----------\n-----------'.format(self.split))
+        # pids = []
+        # for i in annotations:
+        #     pids.append(i['pids'][0])
+        # np.savetxt('data/anno_loaded/pids_{}.txt'.format(self.split), pids)
         print('\n<<< End')
-        print('-----------\n-----------\n{} pid:'.format(self.split))
-        pids = []
-        for i in annotations:
-            pids.append(i['pids'][0])
-        np.savetxt('data/anno_loaded/pids_{}.txt'.format(self.split), pids)
         return annotations

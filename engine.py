@@ -40,6 +40,30 @@ def train_one_epoch(cfg, model, optimizer, data_loader, device, epoch, tfboard=N
     for i, (images, targets) in enumerate(
         metric_logger.log_every(data_loader, cfg.DISP_PERIOD, header)
     ):
+
+        if False:
+            # show the image with annotations to check
+            import matplotlib.pyplot as plt
+            from PIL import Image
+            import os
+            import cv2
+            import numpy as np
+            for im, tgt in zip(images, targets):
+                print("images:", type(im), im.shape, im)
+                print("targets:", type(tgt), tgt)
+                image = (np.array(im.cpu().numpy().transpose(1, 2, 0)) * 255).astype(np.uint8)
+                image_tgt = (np.array(Image.open(os.path.join('/home/pengzheng/datasets/ps/mvn/frames', tgt['img_name'])).convert('RGB')) * 1).astype(np.uint8)
+                boxes = tgt['boxes']
+                labels = tgt['labels']
+                for box, lbl in zip(boxes, labels):
+                    x1, y1, x2, y2 = box
+                    cv2.rectangle(image_tgt, (x1, y1), (x2, y2), (0, 0, 255), 2)
+                    cv2.putText(image_tgt, str(lbl), (x1, y1+50), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 0, 0), 1, cv2.LINE_AA)
+                plt.imshow(image)
+                plt.figure()
+                plt.imshow(image_tgt)
+                plt.show()
+                # break
         images, targets = to_device(images, targets, device)
 
         loss_dict = model(images, targets)

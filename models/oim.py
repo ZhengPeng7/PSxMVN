@@ -77,7 +77,7 @@ class OIMLoss(nn.Module):
         ) % self.num_unlabeled
         loss_oim = F.cross_entropy(projected, labels, ignore_index=5554)
 
-        if random.random() > 0.98:
+        if random.random() > 0.99:
             pred = torch.argmax(projected, dim=1)
             print("@@projected:", projected.shape, pred)
             print("@@labels:", len(labels), labels[0].shape, labels)
