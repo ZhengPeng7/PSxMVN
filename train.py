@@ -21,7 +21,6 @@ from utils.utils import (
     resume_from_ckpt,
     save_on_master,
     set_random_seed,
-    resume_from_ckpt_mvn,
 )
 
 
@@ -33,17 +32,19 @@ def build_dataset(dataset_name, root, verbose=True, is_train=True):
         fn = PRW
     else:
         fn = MVN
+    if is_train:
+        train_transforms = build_transforms(is_train=True)
+        train_set = fn(root, train_transforms, "train")
+        if verbose:
+            train_set.print_statistics()
     test_transforms = build_transforms(is_train=False)
     gallery_set = fn(root, test_transforms, "gallery")
     query_set = fn(root, test_transforms, "query")
     if verbose:
         gallery_set.print_statistics()
         query_set.print_statistics()
+
     if is_train:
-        train_transforms = build_transforms(is_train=True)
-        train_set = fn(root, train_transforms, "train")
-        if verbose:
-            train_set.print_statistics()
         return train_set, gallery_set, query_set
     else:
         return gallery_set, query_set
@@ -152,7 +153,7 @@ def main(args):
     start_epoch = 0
     if args.resume:
         assert args.ckpt, "--ckpt must be specified when --resume enabled"
-        start_epoch = resume_from_ckpt_mvn(args.ckpt, model_without_ddp, optimizer, lr_scheduler) + 1
+        start_epoch = resume_from_ckpt(args.ckpt, model_without_ddp, optimizer, lr_scheduler) + 1
 
     print("Creating output folder")
     output_dir = cfg.OUTPUT_DIR

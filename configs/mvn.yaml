@@ -1,13 +1,13 @@
 OUTPUT_DIR: "./exp_mvn"
 INPUT:
   DATASET: "MVN"
-  DATA_ROOT: "../../../datasets/ps/mvn"
-  BATCH_SIZE_TRAIN: 15
-  NUM_WORKERS_TRAIN: 15
+  DATA_ROOT: "../../../datasets/ps/mvn_cuhk"
+  BATCH_SIZE_TRAIN: 2
+  NUM_WORKERS_TRAIN: 2
   MIN_SIZE: 240
   MAX_SIZE: 720
 SOLVER:
-  MAX_EPOCHS: 10
+  MAX_EPOCHS: 20
   BASE_LR: 0.008
 MODEL:
   LOSS:
