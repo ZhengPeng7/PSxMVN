@@ -414,6 +414,34 @@ def warmup_lr_scheduler(optimizer, warmup_iters, warmup_factor):
     return torch.optim.lr_scheduler.LambdaLR(optimizer, f)
 
 
+def resume_from_ckpt_mvn(ckpt_path, model, optimizer=None, lr_scheduler=None):
+    ckpt = torch.load(ckpt_path, map_location="cpu")
+    model_dict = model.state_dict()
+
+
+    ckpt_model = {}
+    for k, v in ckpt['model'].items():
+        if k in model_dict and v.shape == model_dict[k].shape:
+            ckpt_model[k] = v
+        else:
+            print('Omit {}'.format(k), v.shape, model_dict[k].shape)
+    model_dict.update(ckpt_model)
+
+    missing_keys, unexpected_keys = model.load_state_dict(ckpt_model, strict=False)
+
+    # if missing_keys:
+    #     print(f"missing keys: {missing_keys}")
+    # if unexpected_keys:
+    #     print(f"unexpected keys: {unexpected_keys}")
+    # if optimizer is not None:
+    #     optimizer.load_state_dict(ckpt["optimizer"])
+    # if lr_scheduler is not None:
+    #     lr_scheduler.load_state_dict(ckpt["lr_scheduler"])
+    print(f"loaded checkpoint {ckpt_path}")
+    print(f"model was trained for {ckpt['epoch']} epochs")
+    return -1    # ckpt["epoch"]
+
+
 def resume_from_ckpt(ckpt_path, model, optimizer=None, lr_scheduler=None):
     ckpt = torch.load(ckpt_path, map_location="cpu")
     missing_keys, unexpected_keys = model.load_state_dict(ckpt["model"], strict=False)

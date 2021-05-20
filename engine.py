@@ -31,7 +31,7 @@ def train_one_epoch(cfg, model, optimizer, data_loader, device, epoch, tfboard=N
     header = "Epoch: [{}]".format(epoch)
 
     # warmup learning rate in the first epoch
-    if epoch == 0:
+    if epoch == 0 and True:
         warmup_factor = 1.0 / 1000
         # FIXME: min(1000, len(data_loader) - 1)
         warmup_iters = len(data_loader) - 1
@@ -85,7 +85,7 @@ def train_one_epoch(cfg, model, optimizer, data_loader, device, epoch, tfboard=N
             clip_grad_norm_(model.parameters(), cfg.SOLVER.CLIP_GRADIENTS)
         optimizer.step()
 
-        if epoch == 0:
+        if epoch == 0 and True:
             warmup_scheduler.step()
 
         metric_logger.update(loss=loss_value, **loss_dict_reduced)

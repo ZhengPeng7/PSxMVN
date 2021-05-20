@@ -520,7 +520,10 @@ def eval_search_mvn(
     accs = []
     topk = [1, 5, 10]
     ret = {"image_root": gallery_dataset.img_prefix, "results": []}
+    print('query_dataset-{}:\n'.format(len(query_dataset)), query_dataset)
     for i in range(len(query_dataset)):
+        if i % (len(query_dataset) // 10) == 0:
+            print('{} / {}'.format(i, len(query_dataset)))
         y_true, y_score = [], []
         imgs, rois = [], []
         count_gt, count_tp = 0, 0
@@ -611,6 +614,8 @@ def eval_search_mvn(
                         label[j] = 1
                         count_tp += 1
                         break
+            else:
+                continue
             y_true.extend(list(label))
             y_score.extend(list(sim))
             imgs.extend([gallery_imname] * len(sim))
@@ -635,16 +640,16 @@ def eval_search_mvn(
             "gallery": [],
         }
         # only save top-10 predictions
-        for k in range(10):
-            new_entry["gallery"].append(
-                {
-                    "img": str(imgs[inds[k]]),
-                    "roi": list(map(float, list(rois[inds[k]]))),
-                    "score": float(y_score[k]),
-                    "correct": int(y_true[k]),
-                }
-            )
-        ret["results"].append(new_entry)
+        # for k in range(10):
+        #     new_entry["gallery"].append(
+        #         {
+        #             "img": str(imgs[inds[k]]),
+        #             "roi": list(map(float, list(rois[inds[k]]))),
+        #             "score": float(y_score[k]),
+        #             "correct": int(y_true[k]),
+        #         }
+        #     )
+        # ret["results"].append(new_entry)
 
     print("search ranking:")
     mAP = np.mean(aps)

@@ -21,10 +21,11 @@ from utils.utils import (
     resume_from_ckpt,
     save_on_master,
     set_random_seed,
+    resume_from_ckpt_mvn,
 )
 
 
-def build_dataset(dataset_name, root, verbose=True):
+def build_dataset(dataset_name, root, verbose=True, is_train=True):
     assert dataset_name in ["CUHK-SYSU", "PRW", "MVN"]
     if dataset_name == "CUHK-SYSU":
         fn = CUHKSYSU
@@ -32,16 +33,20 @@ def build_dataset(dataset_name, root, verbose=True):
         fn = PRW
     else:
         fn = MVN
-    train_transforms = build_transforms(is_train=True)
     test_transforms = build_transforms(is_train=False)
-    train_set = fn(root, train_transforms, "train")
     gallery_set = fn(root, test_transforms, "gallery")
     query_set = fn(root, test_transforms, "query")
     if verbose:
-        train_set.print_statistics()
         gallery_set.print_statistics()
         query_set.print_statistics()
-    return train_set, gallery_set, query_set
+    if is_train:
+        train_transforms = build_transforms(is_train=True)
+        train_set = fn(root, train_transforms, "train")
+        if verbose:
+            train_set.print_statistics()
+        return train_set, gallery_set, query_set
+    else:
+        return gallery_set, query_set
 
 
 def collate_fn(batch):
@@ -64,32 +69,35 @@ def main(args):
     set_random_seed(cfg.SEED + args.rank if args.distributed else 0)
 
     print("Loading data")
-    train_set, gallery_set, query_set = build_dataset(cfg.INPUT.DATASET, cfg.INPUT.DATA_ROOT)
+    if not args.eval:
+        train_set, gallery_set, query_set = build_dataset(cfg.INPUT.DATASET, cfg.INPUT.DATA_ROOT)
 
-    if args.distributed:
-        train_sampler = torch.utils.data.distributed.DistributedSampler(train_set)
+        if args.distributed:
+            train_sampler = torch.utils.data.distributed.DistributedSampler(train_set)
+        else:
+            train_sampler = torch.utils.data.RandomSampler(train_set)
+
+        if cfg.INPUT.ASPECT_RATIO_GROUP_FACTOR_TRAIN >= 0:
+            group_ids = create_aspect_ratio_groups(
+                train_set, k=cfg.INPUT.ASPECT_RATIO_GROUP_FACTOR_TRAIN
+            )
+            train_batch_sampler = GroupedBatchSampler(
+                train_sampler, group_ids, cfg.INPUT.BATCH_SIZE_TRAIN
+            )
+        else:
+            train_batch_sampler = torch.utils.data.BatchSampler(
+                train_sampler, cfg.INPUT.BATCH_SIZE_TRAIN, drop_last=True
+            )
+
+        train_loader = torch.utils.data.DataLoader(
+            train_set,
+            batch_sampler=train_batch_sampler,
+            num_workers=cfg.INPUT.NUM_WORKERS_TRAIN,
+            collate_fn=collate_fn,
+            pin_memory=True,
+        )
     else:
-        train_sampler = torch.utils.data.RandomSampler(train_set)
-
-    if cfg.INPUT.ASPECT_RATIO_GROUP_FACTOR_TRAIN >= 0:
-        group_ids = create_aspect_ratio_groups(
-            train_set, k=cfg.INPUT.ASPECT_RATIO_GROUP_FACTOR_TRAIN
-        )
-        train_batch_sampler = GroupedBatchSampler(
-            train_sampler, group_ids, cfg.INPUT.BATCH_SIZE_TRAIN
-        )
-    else:
-        train_batch_sampler = torch.utils.data.BatchSampler(
-            train_sampler, cfg.INPUT.BATCH_SIZE_TRAIN, drop_last=True
-        )
-
-    train_loader = torch.utils.data.DataLoader(
-        train_set,
-        batch_sampler=train_batch_sampler,
-        num_workers=cfg.INPUT.NUM_WORKERS_TRAIN,
-        collate_fn=collate_fn,
-        pin_memory=True,
-    )
+        gallery_set, query_set = build_dataset(cfg.INPUT.DATASET, cfg.INPUT.DATA_ROOT, is_train=False)
     gallery_loader = torch.utils.data.DataLoader(
         gallery_set,
         batch_size=cfg.INPUT.BATCH_SIZE_TEST,
@@ -144,7 +152,7 @@ def main(args):
     start_epoch = 0
     if args.resume:
         assert args.ckpt, "--ckpt must be specified when --resume enabled"
-        start_epoch = resume_from_ckpt(args.ckpt, model_without_ddp, optimizer, lr_scheduler) + 1
+        start_epoch = resume_from_ckpt_mvn(args.ckpt, model_without_ddp, optimizer, lr_scheduler) + 1
 
     print("Creating output folder")
     output_dir = cfg.OUTPUT_DIR
