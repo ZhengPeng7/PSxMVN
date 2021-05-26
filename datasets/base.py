@@ -56,7 +56,7 @@ class BaseDataset:
             "num_images": num_imgs,
             "num_boxes": num_boxes,
         }
-        if self.name != 'CUHK-SYSU' or self.split != 'query':
+        if self.name not in ['CUHK-SYSU', 'MVN'] or self.split != 'query':
             pid_list = sorted(list(pid_set))
             if self.split == 'query':
                 num_pids, min_pid, max_pid = len(pid_list), min(pid_list), max(pid_list)

@@ -35,11 +35,14 @@ def build_dataset(dataset_name, root, verbose=True, is_train=True):
     if is_train:
         train_transforms = build_transforms(is_train=True)
         train_set = fn(root, train_transforms, "train")
+        print('len(train_set):', len(train_set))
         if verbose:
             train_set.print_statistics()
     test_transforms = build_transforms(is_train=False)
     gallery_set = fn(root, test_transforms, "gallery")
     query_set = fn(root, test_transforms, "query")
+    print('len(gallery_set):', len(gallery_set))
+    print('len(query_set):', len(query_set))
     if verbose:
         gallery_set.print_statistics()
         query_set.print_statistics()

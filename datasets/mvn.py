@@ -5,19 +5,23 @@ from scipy.io import loadmat
 
 from .base import BaseDataset
 
+from config import ConfigMVN
+
 
 class MVN(BaseDataset):
     def __init__(self, root, transforms, split):
         self.name = "MVN"
         self.img_prefix = osp.join(root, "Image", "SSM")
+        self.gallery_size = ConfigMVN().gallery_size
+        self.test_mat = 'TestG{}'.format(self.gallery_size)
+        self.test_mat_path = osp.join(root, "annotation/test/train_test/{}.mat".format(self.test_mat))
+        self.protoc = loadmat(self.test_mat_path)["{}".format(self.test_mat)].squeeze()
+        self.train_mat = 'Train_app{}'.format(ConfigMVN().train_appN)
         super(MVN, self).__init__(root, transforms, split)
 
     def _load_queries(self):
-        # TestG50: a test protocol, 50 gallery images per query
-        protoc = loadmat(osp.join(self.root, "annotation/test/train_test/TestG50.mat"))
-        protoc = protoc["TestG50"].squeeze()
         queries = []
-        for item in protoc["Query"]:
+        for item in self.protoc["Query"]:
             img_name = str(item["imname"][0, 0][0])
             roi = item["idlocate"][0, 0][0].astype(np.int32)
             roi[2:] += roi[:2]
@@ -31,13 +35,13 @@ class MVN(BaseDataset):
             )
         return queries
 
-    def _load_split_img_names(self):
+    def _load_split_img_names_all(self):
         """
         Load the image names for the specific split.
         """
         assert self.split in ("train", "gallery")
-        # gallery images
-        gallery_imgs = loadmat(osp.join(self.root, "annotation", "pool.mat"))
+        # the whole gallery images
+        gallery_imgs = loadmat(osp.join(self.root, "annotation", "pool_{}.mat".format(self.gallery_size)))
         gallery_imgs = gallery_imgs["pool"].squeeze()
         gallery_imgs = [str(a.squeeze()) for a in gallery_imgs]
         if self.split == "gallery":
@@ -46,8 +50,27 @@ class MVN(BaseDataset):
         all_imgs = loadmat(osp.join(self.root, "annotation", "Images.mat"))
         all_imgs = all_imgs["Img"].squeeze()
         all_imgs = [str(a[0].squeeze()) for a in all_imgs]
-        # training images = all images - gallery images
+        # the whole training images = all images - all gallery images
         training_imgs = sorted(list(set(all_imgs) - set(gallery_imgs)))
+        return training_imgs
+
+    def _load_split_img_names(self):
+        """
+        Load the image names for the specific split.
+        """
+        assert self.split in ("train", "gallery")
+        if self.split == "gallery":
+            gallery_imgs = loadmat(osp.join(self.root, "annotation", "pool_{}.mat".format(self.gallery_size)))
+            gallery_imgs = gallery_imgs["pool"].squeeze()
+            gallery_imgs = [str(a.squeeze()) for a in gallery_imgs]
+            return gallery_imgs
+        # training images
+        train_imgs = loadmat(self.test_mat_path.replace(self.test_mat, self.train_mat))['Train']
+        training_imgs = []
+        for train_img in train_imgs[:, 2]:
+            for app in train_img:
+                fn = app[0][0]
+                training_imgs.append(fn)
         return training_imgs
 
     def _load_annotations(self):
@@ -78,7 +101,7 @@ class MVN(BaseDataset):
 
         # assign a unique pid from 1 to N for each identity
         if self.split == "train":
-            train = loadmat(osp.join(self.root, "annotation/test/train_test/Train.mat"))
+            train = loadmat(osp.join(self.root, "annotation/test/train_test/{}.mat".format(self.train_mat)))
             train = train["Train"].squeeze()
             for index, item in enumerate(train):
                 scenes = item[2]
@@ -87,9 +110,7 @@ class MVN(BaseDataset):
                     box = box.squeeze().astype(np.int32)
                     set_box_pid(name_to_boxes[img_name], box, name_to_pids[img_name], index + 1)
         else:
-            protoc = loadmat(osp.join(self.root, "annotation/test/train_test/TestG50.mat"))
-            protoc = protoc["TestG50"].squeeze()
-            for index, item in enumerate(protoc):
+            for index, item in enumerate(self.protoc):
                 # query
                 im_name = str(item["Query"][0, 0][0][0])
                 box = item["Query"][0, 0][1].squeeze().astype(np.int32)

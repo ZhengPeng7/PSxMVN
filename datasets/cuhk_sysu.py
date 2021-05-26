@@ -13,9 +13,9 @@ class CUHKSYSU(BaseDataset):
         super(CUHKSYSU, self).__init__(root, transforms, split)
 
     def _load_queries(self):
-        # TestG50: a test protocol, 50 gallery images per query
-        protoc = loadmat(osp.join(self.root, "annotation/test/train_test/TestG50.mat"))
-        protoc = protoc["TestG50"].squeeze()
+        # TestG100: a test protocol, 100 gallery images per query
+        protoc = loadmat(osp.join(self.root, "annotation/test/train_test/TestG100.mat"))
+        protoc = protoc["TestG100"].squeeze()
         queries = []
         for item in protoc["Query"]:
             img_name = str(item["imname"][0, 0][0])
@@ -87,8 +87,8 @@ class CUHKSYSU(BaseDataset):
                     box = box.squeeze().astype(np.int32)
                     set_box_pid(name_to_boxes[img_name], box, name_to_pids[img_name], index + 1)
         else:
-            protoc = loadmat(osp.join(self.root, "annotation/test/train_test/TestG50.mat"))
-            protoc = protoc["TestG50"].squeeze()
+            protoc = loadmat(osp.join(self.root, "annotation/test/train_test/TestG100.mat"))
+            protoc = protoc["TestG100"].squeeze()
             for index, item in enumerate(protoc):
                 # query
                 im_name = str(item["Query"][0, 0][0][0])

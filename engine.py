@@ -15,6 +15,7 @@ from utils.utils import (
     reduce_dict,
     warmup_lr_scheduler,
 )
+from config import ConfigMVN
 
 def to_device(images, targets, device):
     images = [image.to(device) for image in images]
@@ -179,19 +180,37 @@ def evaluate_performance(
 
     eval_detection(gallery_loader.dataset, gallery_dets, det_thresh=0.01)
     if gallery_loader.dataset.name == "CUHK-SYSU":
-        eval_search_func = eval_search_cuhk
+        eval_search_cuhk(
+            gallery_loader.dataset,
+            query_loader.dataset,
+            gallery_dets,
+            gallery_feats,
+            query_box_feats,
+            query_dets,
+            query_feats,
+            cbgm=use_cbgm,
+            gallery_size=100,
+        )
     elif gallery_loader.dataset.name == "PRW":
-        eval_search_func = eval_search_prw
+        eval_search_prw(
+            gallery_loader.dataset,
+            query_loader.dataset,
+            gallery_dets,
+            gallery_feats,
+            query_box_feats,
+            query_dets,
+            query_feats,
+            cbgm=use_cbgm,
+        )
     elif gallery_loader.dataset.name == "MVN":
-        eval_search_func = eval_search_mvn
-
-    eval_search_func(
-        gallery_loader.dataset,
-        query_loader.dataset,
-        gallery_dets,
-        gallery_feats,
-        query_box_feats,
-        query_dets,
-        query_feats,
-        cbgm=use_cbgm,
-    )
+        eval_search_mvn(
+            gallery_loader.dataset,
+            query_loader.dataset,
+            gallery_dets,
+            gallery_feats,
+            query_box_feats,
+            query_dets,
+            query_feats,
+            cbgm=use_cbgm,
+            gallery_size=ConfigMVN().gallery_size,
+        )
