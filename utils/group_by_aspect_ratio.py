@@ -111,7 +111,7 @@ def _compute_aspect_ratios_slow(dataset, indices=None):
         dataset,
         batch_size=1,
         sampler=sampler,
-        num_workers=14,  # you might want to increase it for faster processing
+        num_workers=10,  # you might want to increase it for faster processing
         collate_fn=lambda x: x[0],
     )
     aspect_ratios = []

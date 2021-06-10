@@ -14,20 +14,20 @@ fi
 # Train
 python -m torch.distributed.launch --nproc_per_node=${NGPU} --use_env --master_port=55555 train.py --cfg configs/${dataset}.yaml --world-size ${NGPU}
 
-# # Test
+# Test
 
-# # vanilla
-# # let ep_st=epoch/2
-# # for (( ep = ${ep_st}; ep < ${epoch}; ep ++ ))
-# # do
-# python train.py --cfg ./exp_${dataset}/config.yaml --eval --ckpt ./exp_${dataset}/epoch_${epoch}.pth
-# # # done
+# vanilla
+# let ep_st=epoch/2
+# for (( ep = ${ep_st}; ep < ${epoch}; ep ++ ))
+# do
+python train.py --cfg ./exp_${dataset}/config.yaml --eval --ckpt ./exp_${dataset}/epoch_${epoch}.pth
+# # done
 
-# # # CBGM
-# python train.py --cfg ./exp_${dataset}/config.yaml --eval --ckpt ./exp_${dataset}/epoch_${epoch}.pth EVAL_USE_CBGM True
+# # CBGM
+python train.py --cfg ./exp_${dataset}/config.yaml --eval --ckpt ./exp_${dataset}/epoch_${epoch}.pth EVAL_USE_CBGM True
 
-# # # using GT bbox
-# python train.py --cfg ./exp_${dataset}/config.yaml --eval --ckpt ./exp_${dataset}/epoch_${epoch}.pth EVAL_USE_GT True
+# # using GT bbox
+python train.py --cfg ./exp_${dataset}/config.yaml --eval --ckpt ./exp_${dataset}/epoch_${epoch}.pth EVAL_USE_GT True
 
-# # # CBGM, using GT bbox
-# python train.py --cfg ./exp_${dataset}/config.yaml --eval --ckpt ./exp_${dataset}/epoch_${epoch}.pth EVAL_USE_CBGM True EVAL_USE_GT True
+# # CBGM, using GT bbox
+python train.py --cfg ./exp_${dataset}/config.yaml --eval --ckpt ./exp_${dataset}/epoch_${epoch}.pth EVAL_USE_CBGM True EVAL_USE_GT True
